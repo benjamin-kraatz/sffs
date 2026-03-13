@@ -13,7 +13,7 @@ cargo install --path .
 
 ### Pre-built Binaries
 
-*(Coming soon)*
+Pre-built binaries for macOS, Linux, and Windows are available on the [GitHub Releases](https://github.com/benn/sffs/releases) page.
 
 ## Basic Usage
 

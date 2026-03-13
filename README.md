@@ -27,7 +27,7 @@ cargo install --path .
 
 ### Pre-built Binaries
 
-*(Coming soon)*
+Download for your platform from the [GitHub Releases](https://github.com/benn/sffs/releases) page.
 
 ## Usage
 
