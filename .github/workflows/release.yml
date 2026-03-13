@@ -4,6 +4,13 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      tag_name:
+        type: string
+        description: 'Tag to release'
+        required: true
 
 permissions:
   contents: write
@@ -34,6 +41,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag_name || github.ref }}
       
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
