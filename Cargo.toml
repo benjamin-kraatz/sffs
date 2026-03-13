@@ -1,6 +1,6 @@
 [package]
 name = "sffs"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["Benn <benjamin-kraatz@users.noreply.github.com>"]
 description = "Super Fast File Size (sffs) - a blazingly fast, parallel disk usage analyzer with a beautiful UI"
