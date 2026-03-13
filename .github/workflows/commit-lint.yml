@@ -9,12 +9,18 @@ on:
 jobs:
   commitlint:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Fetch base branch
+        run: git fetch origin ${{ github.event.pull_request.base.ref }}:base-branch
+      - name: Debug commits to check
+        run: git log base-branch..HEAD --oneline
       - name: Conventional commits check
-        uses: cocogitto/cocogitto-action@v3
-        if: github.event_name == 'pull_request'
+        uses: cocogitto/cocogitto-action@v4
         with:
-          check: true
+          command: check
+          args: base-branch..HEAD
