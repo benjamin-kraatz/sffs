@@ -44,13 +44,19 @@ struct ThreadLocalData<'a> {
 impl<'a> Drop for ThreadLocalData<'a> {
     fn drop(&mut self) {
         if self.local_size > 0 {
-            self.stats.total_size.fetch_add(self.local_size, Ordering::Relaxed);
+            self.stats
+                .total_size
+                .fetch_add(self.local_size, Ordering::Relaxed);
         }
         if self.local_files > 0 {
-            self.stats.total_files.fetch_add(self.local_files, Ordering::Relaxed);
+            self.stats
+                .total_files
+                .fetch_add(self.local_files, Ordering::Relaxed);
         }
         if self.local_dirs > 0 {
-            self.stats.total_dirs.fetch_add(self.local_dirs, Ordering::Relaxed);
+            self.stats
+                .total_dirs
+                .fetch_add(self.local_dirs, Ordering::Relaxed);
         }
         if let Some(h) = self.heap.take() {
             if !h.is_empty() {
