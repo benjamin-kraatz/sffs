@@ -6,6 +6,7 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Mutex;
 use mimalloc::MiMalloc;
+use owo_colors::OwoColorize;
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
@@ -87,6 +88,7 @@ fn format_size(bytes: u64, use_si: bool) -> String {
 
 fn main() {
     let mut args = Args::parse();
+    let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
     
     // Default to current directory if no paths provided
     if args.paths.is_empty() {
@@ -113,7 +115,8 @@ fn main() {
                 total_size.fetch_add(s, Ordering::Relaxed);
                 if let Some(ref top_mutex) = top_files {
                     let mut heap = BinaryHeap::new();
-                    heap.push(Reverse((s, path.clone())));
+                    let abs_p = if path.is_absolute() { path.clone() } else { cwd.join(path) };
+                    heap.push(Reverse((s, abs_p)));
                     top_mutex.lock().unwrap().push(heap);
                 }
             }
@@ -121,7 +124,8 @@ fn main() {
         }
 
         // Handle directory traversal in parallel
-        let mut builder = WalkBuilder::new(path);
+        let abs_root = if path.is_absolute() { path.clone() } else { cwd.join(path) };
+        let mut builder = WalkBuilder::new(abs_root);
         builder
             .follow_links(args.follow_links)
             .hidden(args.ignore_hidden)
@@ -195,11 +199,12 @@ fn main() {
     }
 
     let final_size = total_size.load(Ordering::SeqCst);
-    if args.bytes {
-        println!("# Total Size: {} B", final_size);
+    let size_str = if args.bytes {
+        format!("{} B", final_size)
     } else {
-        println!("# Total Size: {}", format_size(final_size, args.si));
-    }
+        format_size(final_size, args.si)
+    };
+    println!("{} {}", "# Total Size:".cyan().bold(), size_str.green().bold());
 
     if let (Some(n), Some(top_mutex)) = (args.top, top_files) {
         let heaps = top_mutex.into_inner().unwrap();
@@ -214,7 +219,9 @@ fn main() {
         }
         
         if !final_heap.is_empty() {
-            println!("\n# Top {} Largest Files:", n);
+            println!("\n{}", format!("# Top {} Largest Files:", n).cyan().bold());
+            println!("{:<16} {}", "SIZE".dimmed(), "PATH".dimmed());
+
             let sorted_files: Vec<_> = final_heap.into_sorted_vec();
             for Reverse((s, p)) in sorted_files {
                 let s_str = if args.bytes {
@@ -222,7 +229,18 @@ fn main() {
                 } else {
                     format_size(s, args.si)
                 };
-                println!("{}: {}", s_str, p.display());
+                
+                let p_display = if let Ok(rel) = p.strip_prefix(&cwd) {
+                    if rel.as_os_str().is_empty() {
+                        ".".bold().to_string()
+                    } else {
+                        format!("{}{}", "./".dimmed(), rel.display().bold())
+                    }
+                } else {
+                    p.display().to_string().bold().to_string()
+                };
+
+                println!("{:<16} {}", s_str.green(), p_display);
             }
         }
     }
