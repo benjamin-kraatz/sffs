@@ -1,14 +1,14 @@
 [package]
 name = "sffs"
-version = "0.1.0"
+version = "0.1.4"
 edition = "2021"
-authors = ["Benn <benn@example.com>"]
+authors = ["Benn <benjamin-kraatz@users.noreply.github.com>"]
 description = "Super Fast File Size (sffs) - a blazingly fast, parallel disk usage analyzer with a beautiful UI"
-license = "MIT OR Apache-2.0"
+license = "MIT"
 readme = "README.md"
 categories = ["command-line-utilities"]
 keywords = ["cli", "du", "fast", "file-size", "rust"]
-repository = "https://github.com/benn/sffs"
+repository = "https://github.com/benjamin-kraatz/sffs"
 
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }

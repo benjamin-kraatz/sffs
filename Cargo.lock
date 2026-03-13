@@ -581,7 +581,7 @@ dependencies = [
 
 [[package]]
 name = "sffs"
-version = "0.1.0"
+version = "0.1.4"
 dependencies = [
  "assert_cmd",
  "clap",
