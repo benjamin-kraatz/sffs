@@ -66,19 +66,19 @@ Arguments:
   [PATHS]...  Path(s) to check size for. If omitted, checks the current directory.
 
 Options:
-  -L, --follow-links          Follow symbolic links
-  -g, --git-ignore           Respect .gitignore files
-  -i, --ignore-files         Respect .ignore files
-  -H, --ignore-hidden        Ignore hidden files
-  -d, --max-depth <MAX_DEPTH>  Maximum depth to recurse
-  -t, --threads <THREADS>     Use the provided number of threads
-  -b, --bytes                 Show size in raw bytes
-      --si                    Use SI units (1000 bytes = 1 KB) instead of 1024
-  -x, --one-file-system      Don't cross filesystem boundaries
-      --top <N>               Show top N largest files
-  -s, --silent                Suppress headers and footer
-  -h, --help                  Print help
-  -V, --version               Print version
+  -L, --follow-links            Follow symbolic links
+  -g, --git-ignore              Respect .gitignore files
+  -i, --ignore-files            Respect .ignore files
+  -H, --ignore-hidden           Ignore hidden files
+  -d, --max-depth <MAX_DEPTH>   Maximum depth to recurse
+  -t, --threads <THREADS>       Use the provided number of threads
+  -b, --bytes                   Show size in raw bytes
+      --si                      Use SI units (1000 bytes = 1 KB) instead of 1024
+  -x, --one-file-system         Don't cross filesystem boundaries
+      --top <N>                 Show top N largest files
+  -s, --silent                  Suppress headers and footer
+  -h, --help                    Print help
+  -V, --version                 Print version
 ```
 
 ## Benchmarks
