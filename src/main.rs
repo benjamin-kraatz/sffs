@@ -237,11 +237,12 @@ fn main() -> std::process::ExitCode {
                     if self.local_dirs > 0 {
                         self.dirs_ref.fetch_add(self.local_dirs, Ordering::Relaxed);
                     }
-                    if let Some(h) = self.heap.take()
-                        && !h.is_empty()
-                        && let Some(m) = self.top_ref
-                    {
-                        m.lock().unwrap().push(h);
+                    if let Some(h) = self.heap.take() {
+                        if !h.is_empty() {
+                            if let Some(m) = self.top_ref {
+                                m.lock().unwrap().push(h);
+                            }
+                        }
                     }
                 }
             }
@@ -258,26 +259,26 @@ fn main() -> std::process::ExitCode {
             };
 
             Box::new(move |result: Result<ignore::DirEntry, ignore::Error>| {
-                if let Ok(entry) = result
-                    && let Ok(metadata) = entry.metadata()
-                {
-                    let s = metadata.len();
-                    tld.local_size += s;
-                    if metadata.is_dir() {
-                        tld.local_dirs += 1;
-                    } else {
-                        tld.local_files += 1;
-                    }
+                if let Ok(entry) = result {
+                    if let Ok(metadata) = entry.metadata() {
+                        let s = metadata.len();
+                        tld.local_size += s;
+                        if metadata.is_dir() {
+                            tld.local_dirs += 1;
+                        } else {
+                            tld.local_files += 1;
+                        }
 
-                    if let (Some(heap), true) = (&mut tld.heap, metadata.is_file()) {
-                        let n = n_top.unwrap();
-                        if heap.len() < n {
-                            heap.push(Reverse((s, entry.path().to_path_buf())));
-                        } else if let Some(Reverse((min_s, _))) = heap.peek()
-                            && s > *min_s
-                        {
-                            heap.pop();
-                            heap.push(Reverse((s, entry.path().to_path_buf())));
+                        if let (Some(heap), true) = (&mut tld.heap, metadata.is_file()) {
+                            let n = n_top.unwrap();
+                            if heap.len() < n {
+                                heap.push(Reverse((s, entry.path().to_path_buf())));
+                            } else if let Some(Reverse((min_s, _))) = heap.peek() {
+                                if s > *min_s {
+                                    heap.pop();
+                                    heap.push(Reverse((s, entry.path().to_path_buf())));
+                                }
+                            }
                         }
                     }
                 }
@@ -386,7 +387,7 @@ fn main() -> std::process::ExitCode {
                     if rel.as_os_str().is_empty() {
                         ".".bold().to_string()
                     } else {
-                        format!("{}{}", "./".dimmed(), rel.display().bold())
+                        format!("{}{}", "./".dimmed(), rel.display().to_string().bold())
                     }
                 } else {
                     p.display().to_string().bold().to_string()

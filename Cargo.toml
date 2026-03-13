@@ -1,7 +1,7 @@
 [package]
 name = "sffs"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 authors = ["Benn <benn@example.com>"]
 description = "Super Fast File Size (sffs) - a blazingly fast, parallel disk usage analyzer with a beautiful UI"
 license = "MIT OR Apache-2.0"
