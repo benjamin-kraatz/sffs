@@ -296,12 +296,13 @@ fn main() {
         };
         let total_ms = duration.as_secs_f64() * 1000.0;
         let speed_val = if total_ms < 1000.0 {
-            format!("{:.1}ms ({:.3}ms/file)", total_ms, ms_per_file)
+            format!("{:.1}ms", total_ms).bright_green().to_string()
         } else {
-            format!("{:.2}s ({:.3}ms/file)", total_ms / 1000.0, ms_per_file)
+            format!("{:.2}s", total_ms / 1000.0).bright_yellow().to_string()
         };
-        let speed_str = format!("{}", speed_val);
-        println!("    {:<12} ❯ {}", "Speed".dimmed(), speed_str.dimmed());
+        let per_file_val = format!("{:.3}ms/file", ms_per_file).bright_blue().to_string();
+        let speed_str = format!("{} ({})", speed_val, per_file_val);
+        println!("    {:<12} ❯ {}", "Speed".dimmed(), speed_str);
 
         println!("  {}", "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".dimmed());
         println!();
