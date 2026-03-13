@@ -15,5 +15,6 @@ jobs:
           fetch-depth: 0
       - name: Conventional commits check
         uses: cocogitto/cocogitto-action@v3
+        if: github.event_name == 'pull_request'
         with:
           check: true
