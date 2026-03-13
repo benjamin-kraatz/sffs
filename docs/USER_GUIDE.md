@@ -78,8 +78,8 @@ sffs --top 10
 
 ### Controlling Parallelism
 
-`sffs` automatically chooses the number of threads based on your CPU.
-Use `-t, --threads <N>` to override this:
+`sffs` uses a low-overhead default scan path.
+Use `-t, --threads <N>` to explicitly enable or override parallel traversal:
 ```bash
 sffs --threads 4
 ```

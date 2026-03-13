@@ -13,6 +13,8 @@ use sffs::scan::collect_scan_summary;
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
+const SECTION_DIVIDER: &str = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
+
 fn main() -> std::process::ExitCode {
     let mut args = Args::parse();
     let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
@@ -51,10 +53,7 @@ fn main() -> std::process::ExitCode {
         let grad_size = apply_gradient(&size_str, (0, 255, 255), (255, 0, 255)); // Cyan to Magenta
 
         println!("  {}", "📊 SUMMARY".bold());
-        println!(
-            "  {}",
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".dimmed()
-        );
+        println!("  {}", SECTION_DIVIDER.dimmed());
         println!(
             "    {:<12} ❯ {}",
             "Total Size".cyan().bold(),
@@ -92,10 +91,7 @@ fn main() -> std::process::ExitCode {
         let speed_str = format!("{} ({}, {})", speed_val, per_file_val, benchmark_cmp);
         println!("    {:<12} ❯ {}", "Speed".dimmed(), speed_str);
 
-        println!(
-            "  {}",
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".dimmed()
-        );
+        println!("  {}", SECTION_DIVIDER.dimmed());
         println!();
     } else {
         println!("Total Size: {}", size_str);
@@ -104,10 +100,7 @@ fn main() -> std::process::ExitCode {
     if let Some(n) = args.top {
         if !summary.top_files.is_empty() {
             println!("  {}", format!("TOP {}", n).bold());
-            println!(
-                "  {}",
-                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".dimmed()
-            );
+            println!("  {}", SECTION_DIVIDER.dimmed());
             println!(
                 "    {:<4} {:<12} {:<15} {}",
                 "RANK".dimmed(),
@@ -147,10 +140,7 @@ fn main() -> std::process::ExitCode {
                     p_display
                 );
             }
-            println!(
-                "  {}",
-                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".dimmed()
-            );
+            println!("  {}", SECTION_DIVIDER.dimmed());
             println!();
         }
     }

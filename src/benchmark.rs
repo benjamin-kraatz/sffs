@@ -364,7 +364,7 @@ pub fn generate_reference_artifact(config: BenchmarkConfig) -> io::Result<Benchm
 
 pub fn artifact_markdown_table(artifact: &BenchmarkReferenceArtifact) -> String {
     let mut table = String::from(
-        "| Scenario | sffs default | sffs 1 thread | du | sffs vs du |\n| --- | ---: | ---: | ---: | ---: |\n",
+        "| Scenario | sffs default | sffs 1 thread | du | best sffs vs du |\n| --- | ---: | ---: | ---: | ---: |\n",
     );
 
     for scenario in &artifact.scenarios {
