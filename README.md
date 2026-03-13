@@ -1,7 +1,9 @@
 # sffs (Super Fast File Size)
 
-[![CI](https://github.com/benn/sffs/actions/workflows/ci.yml/badge.svg)](https://github.com/benn/sffs/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT%2FApache--2.0-blue.svg)](LICENSE)
+[![CI](https://github.com/benjamin-kraatz/sffs/actions/workflows/ci.yml/badge.svg)](https://github.com/benjamin-kraatz/sffs/actions/workflows/ci.yml)
+[![Commit Lint](https://github.com/benjamin-kraatz/sffs/actions/workflows/commit-lint.yml/badge.svg)](https://github.com/benjamin-kraatz/sffs/actions/workflows/commit-lint.yml)
+[![Release](https://github.com/benjamin-kraatz/sffs/actions/workflows/release.yml/badge.svg)](https://github.com/benjamin-kraatz/sffs/actions/workflows/release.yml)
+[![Release Please](https://github.com/benjamin-kraatz/sffs/actions/workflows/release-please.yml/badge.svg)](https://github.com/benjamin-kraatz/sffs/actions/workflows/release-please.yml)
 [![Rust](https://img.shields.io/badge/rust-2024-orange.svg)](https://www.rust-lang.org)
 
 **sffs** is a blazingly fast, parallel disk usage analyzer for the modern terminal. It is designed to be a faster alternative to `du` with a beautiful, gradient-powered user interface and deep parallelization.
