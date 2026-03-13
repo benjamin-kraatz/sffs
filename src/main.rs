@@ -8,6 +8,8 @@ use std::sync::Mutex;
 use mimalloc::MiMalloc;
 use owo_colors::OwoColorize;
 
+use std::time::Instant;
+
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
@@ -146,6 +148,7 @@ fn main() {
         None
     };
 
+    let start_time = Instant::now();
     for path in &args.paths {
         if !path.exists() {
             eprintln!("Error: Path '{}' does not exist", path.display());
@@ -265,6 +268,7 @@ fn main() {
         });
     }
 
+    let duration = start_time.elapsed();
     let final_size = total_size.load(Ordering::SeqCst);
     let final_files = total_files.load(Ordering::SeqCst);
     let final_dirs = total_dirs.load(Ordering::SeqCst);
@@ -284,6 +288,21 @@ fn main() {
         println!("    {:<12} ❯ {}", "Total Size".cyan().bold(), grad_size.bold());
         println!("    {:<12} ❯ {}", "Files".dimmed(), final_files.yellow());
         println!("    {:<12} ❯ {}", "Directories".dimmed(), final_dirs.blue());
+
+        let ms_per_file = if final_files > 0 {
+            duration.as_secs_f64() * 1000.0 / final_files as f64
+        } else {
+            0.0
+        };
+        let total_ms = duration.as_secs_f64() * 1000.0;
+        let speed_val = if total_ms < 1000.0 {
+            format!("{:.1}ms ({:.3}ms/file)", total_ms, ms_per_file)
+        } else {
+            format!("{:.2}s ({:.3}ms/file)", total_ms / 1000.0, ms_per_file)
+        };
+        let speed_str = format!("{}", speed_val);
+        println!("    {:<12} ❯ {}", "Speed".dimmed(), speed_str.dimmed());
+
         println!("  {}", "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".dimmed());
         println!();
     } else {
@@ -303,7 +322,7 @@ fn main() {
         }
         
         if !final_heap.is_empty() {
-            println!("  {}", format!("🔥 TOP {} CONTRIBUTORS", n).bold());
+            println!("  {}", format!("TOP {}", n).bold());
             println!("  {}", "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".dimmed());
             println!("    {:<4} {:<12} {:<15} {}", "RANK".dimmed(), "SIZE".dimmed(), "IMPACT".dimmed(), "PATH".dimmed());
 
