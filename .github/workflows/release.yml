@@ -5,6 +5,11 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag to release'
+        required: true
+        type: string
   workflow_call:
     inputs:
       tag_name:
@@ -62,3 +67,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tar: all
           zip: windows
+          ref: ${{ inputs.tag_name && format('refs/tags/{0}', inputs.tag_name) || github.ref }}
