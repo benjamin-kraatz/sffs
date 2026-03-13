@@ -30,8 +30,13 @@ fn test_cli_with_path() {
     cmd.arg(dir.path()).arg("--silent");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("Total Size:"))
-        .stdout(predicate::str::contains("13 B").or(predicate::str::contains("109 B")));
+        .stdout(predicate::str::contains("Total Size:"));
+
+    let mut cmd = Command::cargo_bin("sffs").unwrap();
+    cmd.arg(&file_path).arg("--silent");
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("Total Size: 13 B"));
 }
 
 #[test]
