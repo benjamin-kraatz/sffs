@@ -1,0 +1,112 @@
+{
+  "schema_version": 3,
+  "generated_at_epoch_seconds": 1773397537,
+  "generation_context": {
+    "host": {
+      "os": "macos",
+      "architecture": "aarch64",
+      "family": "unix",
+      "available_parallelism": 10
+    },
+    "git": {
+      "commit_sha": "3ba0c4b36204cb03555df208f6d00be999f5b763",
+      "short_commit_sha": "3ba0c4b",
+      "dirty": true
+    }
+  },
+  "reference_label": "repo benchmark reference",
+  "reference_entries_per_second": 159884.47364388595,
+  "reference_bytes_per_second": 227244684.9094731,
+  "scenarios": [
+    {
+      "slug": "tiny-files",
+      "label": "Many tiny files",
+      "weight": 1.3,
+      "total_size": 175960,
+      "total_files": 2000,
+      "total_dirs": 41,
+      "sffs_default_median_ms": 5.6579999999999995,
+      "sffs_single_thread_median_ms": 7.234541,
+      "sffs_best_profile": "default",
+      "sffs_best_median_ms": 5.6579999999999995,
+      "du_median_ms": 5.376333,
+      "sffs_default_entries_per_second": 360728.1724991163,
+      "sffs_single_thread_entries_per_second": 282118.79647927906,
+      "sffs_best_entries_per_second": 360728.1724991163,
+      "du_entries_per_second": 379626.78279042616,
+      "sffs_vs_du_multiplier": 0.9502179215270412
+    },
+    {
+      "slug": "deep-tree",
+      "label": "Deep directory tree",
+      "weight": 1.0,
+      "total_size": 16624,
+      "total_files": 32,
+      "total_dirs": 33,
+      "sffs_default_median_ms": 1.057791,
+      "sffs_single_thread_median_ms": 0.9983749999999999,
+      "sffs_best_profile": "threads-1",
+      "sffs_best_median_ms": 0.9983749999999999,
+      "du_median_ms": 2.433083,
+      "sffs_default_entries_per_second": 61448.81172178625,
+      "sffs_single_thread_entries_per_second": 65105.796919994995,
+      "sffs_best_entries_per_second": 65105.796919994995,
+      "du_entries_per_second": 26715.077126427666,
+      "sffs_vs_du_multiplier": 2.4370431951921874
+    },
+    {
+      "slug": "wide-tree",
+      "label": "Wide directory fan-out",
+      "weight": 1.2,
+      "total_size": 543200,
+      "total_files": 1000,
+      "total_dirs": 201,
+      "sffs_default_median_ms": 7.761792,
+      "sffs_single_thread_median_ms": 10.178917,
+      "sffs_best_profile": "default",
+      "sffs_best_median_ms": 7.761792,
+      "du_median_ms": 9.141875,
+      "sffs_default_entries_per_second": 154732.3092399281,
+      "sffs_single_thread_entries_per_second": 117988.97662688476,
+      "sffs_best_entries_per_second": 154732.3092399281,
+      "du_entries_per_second": 131373.48738634033,
+      "sffs_vs_du_multiplier": 1.1778046873711636
+    },
+    {
+      "slug": "large-files",
+      "label": "Few large files",
+      "weight": 0.9,
+      "total_size": 32505856,
+      "total_files": 16,
+      "total_dirs": 5,
+      "sffs_default_median_ms": 0.29862500000000003,
+      "sffs_single_thread_median_ms": 0.227667,
+      "sffs_best_profile": "threads-1",
+      "sffs_best_median_ms": 0.227667,
+      "du_median_ms": 2.202375,
+      "sffs_default_entries_per_second": 70322.3105902051,
+      "sffs_single_thread_entries_per_second": 92239.9820790892,
+      "sffs_best_entries_per_second": 92239.9820790892,
+      "du_entries_per_second": 9535.160905840286,
+      "sffs_vs_du_multiplier": 9.673668120544479
+    },
+    {
+      "slug": "mixed-tree",
+      "label": "Mixed realistic tree",
+      "weight": 1.6,
+      "total_size": 854400,
+      "total_files": 396,
+      "total_dirs": 61,
+      "sffs_default_median_ms": 2.261083,
+      "sffs_single_thread_median_ms": 3.0027500000000003,
+      "sffs_best_profile": "default",
+      "sffs_best_median_ms": 2.261083,
+      "du_median_ms": 3.528083,
+      "sffs_default_entries_per_second": 202115.5349007533,
+      "sffs_single_thread_entries_per_second": 152193.82232953125,
+      "sffs_best_entries_per_second": 202115.5349007533,
+      "du_entries_per_second": 129532.10001011881,
+      "sffs_vs_du_multiplier": 1.5603509468692656
+    }
+  ]
+}

@@ -17,7 +17,8 @@ fn test_cli_current_dir() {
     let mut cmd = Command::cargo_bin("sffs").unwrap();
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("SUMMARY"));
+        .stdout(predicate::str::contains("SUMMARY"))
+        .stdout(predicate::str::contains("vs built-in ref"));
 }
 
 #[test]
@@ -30,7 +31,7 @@ fn test_cli_with_path() {
     cmd.arg(dir.path()).arg("--silent");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("Total Size:"));
+        .stdout(predicate::str::contains("Total Size: 13 B"));
 
     let mut cmd = Command::cargo_bin("sffs").unwrap();
     cmd.arg(&file_path).arg("--silent");
