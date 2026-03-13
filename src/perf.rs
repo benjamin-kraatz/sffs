@@ -21,8 +21,7 @@ impl SpeedMetrics {
 
         Self {
             total_ms,
-            ms_per_file: (summary.total_files > 0)
-                .then(|| total_ms / summary.total_files as f64),
+            ms_per_file: (summary.total_files > 0).then(|| total_ms / summary.total_files as f64),
             entries_per_second: (entries > 0 && total_seconds > 0.0)
                 .then(|| entries as f64 / total_seconds),
             bytes_per_second: (summary.total_size > 0 && total_seconds > 0.0)

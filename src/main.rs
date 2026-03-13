@@ -59,8 +59,16 @@ fn main() -> std::process::ExitCode {
             "Total Size".cyan().bold(),
             grad_size.bold()
         );
-        println!("    {:<12} ❯ {}", "Files".dimmed(), summary.total_files.yellow());
-        println!("    {:<12} ❯ {}", "Directories".dimmed(), summary.total_dirs.blue());
+        println!(
+            "    {:<12} ❯ {}",
+            "Files".dimmed(),
+            summary.total_files.yellow()
+        );
+        println!(
+            "    {:<12} ❯ {}",
+            "Directories".dimmed(),
+            summary.total_dirs.blue()
+        );
 
         let speed_metrics = SpeedMetrics::from_summary(&summary);
         let total_ms = speed_metrics.total_ms;
@@ -87,7 +95,11 @@ fn main() -> std::process::ExitCode {
                     formatted.dimmed().to_string()
                 }
             })
-            .unwrap_or_else(|| format!("n/a vs {BUILT_IN_REFERENCE_LABEL}").dimmed().to_string());
+            .unwrap_or_else(|| {
+                format!("n/a vs {BUILT_IN_REFERENCE_LABEL}")
+                    .dimmed()
+                    .to_string()
+            });
         let speed_str = format!("{} ({}, {})", speed_val, per_file_val, benchmark_cmp);
         println!("    {:<12} ❯ {}", "Speed".dimmed(), speed_str);
 

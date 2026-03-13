@@ -228,8 +228,11 @@ pub fn create_fixture_at(root: &Path, kind: ScenarioKind) -> io::Result<FixtureE
                 }
 
                 let summary_size = 16_384 + dir_index * 1_024;
-                expectation.total_size +=
-                    write_pattern_file(&section.join("summary.log"), summary_size, dir_index as u8)?;
+                expectation.total_size += write_pattern_file(
+                    &section.join("summary.log"),
+                    summary_size,
+                    dir_index as u8,
+                )?;
                 expectation.total_files += 1;
             }
         }
@@ -262,7 +265,9 @@ pub fn benchmark_du_once(path: &Path) -> io::Result<Duration> {
     Ok(start.elapsed())
 }
 
-pub fn generate_reference_artifact(config: BenchmarkConfig) -> io::Result<BenchmarkReferenceArtifact> {
+pub fn generate_reference_artifact(
+    config: BenchmarkConfig,
+) -> io::Result<BenchmarkReferenceArtifact> {
     let mut scenarios = Vec::with_capacity(ScenarioKind::ALL.len());
 
     for scenario in ScenarioKind::ALL {
@@ -295,15 +300,21 @@ pub fn generate_reference_artifact(config: BenchmarkConfig) -> io::Result<Benchm
         let single_thread_median = median_duration(&mut sffs_single_thread_runs);
         let du_median = median_duration(&mut du_runs);
 
-        let default_entries_per_second = throughput(fixture.expectation.total_entries(), default_median);
+        let default_entries_per_second =
+            throughput(fixture.expectation.total_entries(), default_median);
         let single_thread_entries_per_second =
             throughput(fixture.expectation.total_entries(), single_thread_median);
         let du_entries_per_second = throughput(fixture.expectation.total_entries(), du_median);
-        let (best_profile, best_median, best_entries_per_second) = if single_thread_median < default_median {
-            ("threads-1", single_thread_median, single_thread_entries_per_second)
-        } else {
-            ("default", default_median, default_entries_per_second)
-        };
+        let (best_profile, best_median, best_entries_per_second) =
+            if single_thread_median < default_median {
+                (
+                    "threads-1",
+                    single_thread_median,
+                    single_thread_entries_per_second,
+                )
+            } else {
+                ("default", default_median, default_entries_per_second)
+            };
 
         scenarios.push(ScenarioReference {
             slug: fixture.expectation.slug.clone(),
@@ -353,10 +364,20 @@ pub fn generate_reference_artifact(config: BenchmarkConfig) -> io::Result<Benchm
         generation_context: collect_generation_context(),
         reference_label: "repo benchmark reference".to_string(),
         reference_entries_per_second: weighted_geometric_mean(&weighted_entry_values).ok_or_else(
-            || io::Error::new(ErrorKind::InvalidData, "failed to compute entry throughput reference"),
+            || {
+                io::Error::new(
+                    ErrorKind::InvalidData,
+                    "failed to compute entry throughput reference",
+                )
+            },
         )?,
         reference_bytes_per_second: weighted_geometric_mean(&weighted_byte_values).ok_or_else(
-            || io::Error::new(ErrorKind::InvalidData, "failed to compute byte throughput reference"),
+            || {
+                io::Error::new(
+                    ErrorKind::InvalidData,
+                    "failed to compute byte throughput reference",
+                )
+            },
         )?,
         scenarios,
     })

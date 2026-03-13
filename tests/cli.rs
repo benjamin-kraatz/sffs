@@ -17,8 +17,8 @@ fn test_cli_current_dir() {
     let mut cmd = Command::cargo_bin("sffs").unwrap();
     cmd.assert()
         .success()
-    .stdout(predicate::str::contains("SUMMARY"))
-    .stdout(predicate::str::contains("vs built-in ref"));
+        .stdout(predicate::str::contains("SUMMARY"))
+        .stdout(predicate::str::contains("vs built-in ref"));
 }
 
 #[test]
