@@ -5,6 +5,10 @@ use std::collections::BinaryHeap;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Mutex;
+use mimalloc::MiMalloc;
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Super Fast File Size (sffs)", long_about = None)]
@@ -56,11 +60,7 @@ struct Args {
 
 fn format_size(bytes: u64, use_si: bool) -> String {
     let divisor = if use_si { 1000.0 } else { 1024.0 };
-    let units = if use_si {
-        ["B", "KB", "MB", "GB", "TB", "PB", "EB"]
-    } else {
-        ["B", "KB", "MB", "GB", "TB", "PB", "EB"]
-    };
+    let units = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
 
     if bytes == 0 {
         return "0 B".to_string();
@@ -141,35 +141,49 @@ fn main() {
         builder.build_parallel().run(|| {
             let local_heap = n_top.map(|n| BinaryHeap::with_capacity(n + 1));
             
-            struct HeapFinalizer<'a> {
+            struct ThreadLocalData<'a> {
+                local_size: u64,
                 heap: Option<BinaryHeap<Reverse<(u64, PathBuf)>>>,
+                size_ref: &'a AtomicU64,
                 top_ref: &'a Option<Mutex<Vec<BinaryHeap<Reverse<(u64, PathBuf)>>>>>,
             }
-            impl<'a> Drop for HeapFinalizer<'a> {
+            impl<'a> Drop for ThreadLocalData<'a> {
                 fn drop(&mut self) {
+                    if self.local_size > 0 {
+                        self.size_ref.fetch_add(self.local_size, Ordering::Relaxed);
+                    }
                     if let Some(h) = self.heap.take() {
-                        if let Some(m) = self.top_ref {
-                            m.lock().unwrap().push(h);
+                        if !h.is_empty() {
+                            if let Some(m) = self.top_ref {
+                                m.lock().unwrap().push(h);
+                            }
                         }
                     }
                 }
             }
             
-            let mut finalizer = HeapFinalizer {
+            let mut tld = ThreadLocalData {
+                local_size: 0,
                 heap: local_heap,
+                size_ref,
                 top_ref,
             };
 
             Box::new(move |result: Result<ignore::DirEntry, ignore::Error>| {
                 if let Ok(entry) = result {
                     if let Ok(metadata) = entry.metadata() {
-                        if metadata.is_file() {
-                            let s = metadata.len();
-                            size_ref.fetch_add(s, Ordering::Relaxed);
-                            if let Some(ref mut heap) = finalizer.heap {
-                                heap.push(Reverse((s, entry.path().to_path_buf())));
-                                if heap.len() > n_top.unwrap() {
-                                    heap.pop();
+                        let s = metadata.len();
+                        tld.local_size += s;
+                        if let Some(ref mut heap) = tld.heap {
+                            if metadata.is_file() {
+                                let n = n_top.unwrap();
+                                if heap.len() < n {
+                                    heap.push(Reverse((s, entry.path().to_path_buf())));
+                                } else if let Some(Reverse((min_s, _))) = heap.peek() {
+                                    if s > *min_s {
+                                        heap.pop();
+                                        heap.push(Reverse((s, entry.path().to_path_buf())));
+                                    }
                                 }
                             }
                         }
