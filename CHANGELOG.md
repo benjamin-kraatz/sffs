@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive README and licensing.
 - Top files identification.
 
+## [0.2.0](https://github.com/benjamin-kraatz/sffs/compare/v0.1.1...v0.2.0) (2026-03-13)
+
+
+### Features
+
+* add CLI benchmarks for sffs and du ([30800be](https://github.com/benjamin-kraatz/sffs/commit/30800be8eff22f03e407f6ec52199f4d631ec47c))
+* enhance benchmarking documentation and performance insights ([702be6e](https://github.com/benjamin-kraatz/sffs/commit/702be6ee093c36dcd36e84494cbc2fc55d68b7ed))
+
 ## [0.1.1](https://github.com/benjamin-kraatz/sffs/compare/v0.1.0...v0.1.1) (2026-03-13)
 
 
