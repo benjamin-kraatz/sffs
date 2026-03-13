@@ -2,12 +2,24 @@
 name = "sffs"
 version = "0.1.0"
 edition = "2024"
+authors = ["Benn <benn@example.com>"]
+description = "Super Fast File Size (sffs) - a blazingly fast, parallel disk usage analyzer with a beautiful UI"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+categories = ["command-line-utilities"]
+keywords = ["cli", "du", "fast", "file-size", "rust"]
+repository = "https://github.com/benn/sffs"
 
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
 ignore = "0.4"
 mimalloc = "0.1"
 owo-colors = "4.0"
+
+[dev-dependencies]
+assert_cmd = "2.0"
+predicates = "3.1"
+tempfile = "3.10"
 
 [profile.release]
 lto = true
