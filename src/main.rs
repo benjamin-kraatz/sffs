@@ -57,6 +57,47 @@ struct Args {
     /// Show top N largest files
     #[arg(long, value_name = "N")]
     top: Option<usize>,
+
+    /// Suppress headers and footer
+    #[arg(short = 's', long)]
+    silent: bool,
+}
+
+fn apply_gradient(s: &str, start_rgb: (u8, u8, u8), end_rgb: (u8, u8, u8)) -> String {
+    let chars: Vec<char> = s.chars().collect();
+    let n = chars.len();
+    if n <= 1 {
+        return s.truecolor(start_rgb.0, start_rgb.1, start_rgb.2).to_string();
+    }
+
+    let mut result = String::with_capacity(s.len() * 20);
+    for (i, &c) in chars.iter().enumerate() {
+        let t = i as f32 / (n - 1) as f32;
+        let r = (start_rgb.0 as f32 * (1.0 - t) + end_rgb.0 as f32 * t) as u8;
+        let g = (start_rgb.1 as f32 * (1.0 - t) + end_rgb.1 as f32 * t) as u8;
+        let b = (start_rgb.2 as f32 * (1.0 - t) + end_rgb.2 as f32 * t) as u8;
+        result.push_str(&c.truecolor(r, g, b).to_string());
+    }
+    result
+}
+
+fn draw_gradient_bar(width: usize, percentage: f64, start_rgb: (u8, u8, u8), end_rgb: (u8, u8, u8)) -> String {
+    let filled = ((percentage / 100.0) * width as f64).round() as usize;
+    let mut result = String::with_capacity(width * 20 + 8);
+    result.push('▕');
+    for i in 0..width {
+        if i < filled {
+            let t = i as f32 / (width.max(1) - 1).max(1) as f32;
+            let r = (start_rgb.0 as f32 * (1.0 - t) + end_rgb.0 as f32 * t) as u8;
+            let g = (start_rgb.1 as f32 * (1.0 - t) + end_rgb.1 as f32 * t) as u8;
+            let b = (start_rgb.2 as f32 * (1.0 - t) + end_rgb.2 as f32 * t) as u8;
+            result.push_str(&"█".truecolor(r, g, b).to_string());
+        } else {
+            result.push(' ');
+        }
+    }
+    result.push('▏');
+    result
 }
 
 fn format_size(bytes: u64, use_si: bool) -> String {
@@ -96,6 +137,9 @@ fn main() {
     }
 
     let total_size = AtomicU64::new(0);
+    let total_files = AtomicU64::new(0);
+    let total_dirs = AtomicU64::new(0);
+
     let top_files = if args.top.is_some() {
         Some(Mutex::new(Vec::new()))
     } else {
@@ -113,6 +157,7 @@ fn main() {
             if let Ok(metadata) = path.metadata() {
                 let s = metadata.len();
                 total_size.fetch_add(s, Ordering::Relaxed);
+                total_files.fetch_add(1, Ordering::Relaxed);
                 if let Some(ref top_mutex) = top_files {
                     let mut heap = BinaryHeap::new();
                     let abs_p = if path.is_absolute() { path.clone() } else { cwd.join(path) };
@@ -139,6 +184,8 @@ fn main() {
         }
 
         let size_ref = &total_size;
+        let files_ref = &total_files;
+        let dirs_ref = &total_dirs;
         let top_ref = &top_files;
         let n_top = args.top;
 
@@ -147,14 +194,24 @@ fn main() {
             
             struct ThreadLocalData<'a> {
                 local_size: u64,
+                local_files: u64,
+                local_dirs: u64,
                 heap: Option<BinaryHeap<Reverse<(u64, PathBuf)>>>,
                 size_ref: &'a AtomicU64,
+                files_ref: &'a AtomicU64,
+                dirs_ref: &'a AtomicU64,
                 top_ref: &'a Option<Mutex<Vec<BinaryHeap<Reverse<(u64, PathBuf)>>>>>,
             }
             impl<'a> Drop for ThreadLocalData<'a> {
                 fn drop(&mut self) {
                     if self.local_size > 0 {
                         self.size_ref.fetch_add(self.local_size, Ordering::Relaxed);
+                    }
+                    if self.local_files > 0 {
+                        self.files_ref.fetch_add(self.local_files, Ordering::Relaxed);
+                    }
+                    if self.local_dirs > 0 {
+                        self.dirs_ref.fetch_add(self.local_dirs, Ordering::Relaxed);
                     }
                     if let Some(h) = self.heap.take() {
                         if !h.is_empty() {
@@ -168,8 +225,12 @@ fn main() {
             
             let mut tld = ThreadLocalData {
                 local_size: 0,
+                local_files: 0,
+                local_dirs: 0,
                 heap: local_heap,
                 size_ref,
+                files_ref,
+                dirs_ref,
                 top_ref,
             };
 
@@ -178,6 +239,12 @@ fn main() {
                     if let Ok(metadata) = entry.metadata() {
                         let s = metadata.len();
                         tld.local_size += s;
+                        if metadata.is_dir() {
+                            tld.local_dirs += 1;
+                        } else {
+                            tld.local_files += 1;
+                        }
+
                         if let Some(ref mut heap) = tld.heap {
                             if metadata.is_file() {
                                 let n = n_top.unwrap();
@@ -199,12 +266,29 @@ fn main() {
     }
 
     let final_size = total_size.load(Ordering::SeqCst);
+    let final_files = total_files.load(Ordering::SeqCst);
+    let final_dirs = total_dirs.load(Ordering::SeqCst);
+
     let size_str = if args.bytes {
         format!("{} B", final_size)
     } else {
         format_size(final_size, args.si)
     };
-    println!("{} {}", "# Total Size:".cyan().bold(), size_str.green().bold());
+
+    if !args.silent {
+        println!();
+        let grad_size = apply_gradient(&size_str, (0, 255, 255), (255, 0, 255)); // Cyan to Magenta
+        
+        println!("  {}", "📊 SUMMARY".bold());
+        println!("  {}", "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".dimmed());
+        println!("    {:<12} ❯ {}", "Total Size".cyan().bold(), grad_size.bold());
+        println!("    {:<12} ❯ {}", "Files".dimmed(), final_files.yellow());
+        println!("    {:<12} ❯ {}", "Directories".dimmed(), final_dirs.blue());
+        println!("  {}", "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".dimmed());
+        println!();
+    } else {
+        println!("Total Size: {}", size_str);
+    }
 
     if let (Some(n), Some(top_mutex)) = (args.top, top_files) {
         let heaps = top_mutex.into_inner().unwrap();
@@ -219,15 +303,22 @@ fn main() {
         }
         
         if !final_heap.is_empty() {
-            println!("\n{}", format!("# Top {} Largest Files:", n).cyan().bold());
-            println!("{:<16} {}", "SIZE".dimmed(), "PATH".dimmed());
+            println!("  {}", format!("🔥 TOP {} CONTRIBUTORS", n).bold());
+            println!("  {}", "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".dimmed());
+            println!("    {:<4} {:<12} {:<15} {}", "RANK".dimmed(), "SIZE".dimmed(), "IMPACT".dimmed(), "PATH".dimmed());
 
             let sorted_files: Vec<_> = final_heap.into_sorted_vec();
-            for Reverse((s, p)) in sorted_files {
+            
+            // For the bar, we'll use the largest file in the top list as 100% 
+            // to make the comparison between them visible, OR total size.
+            // Let's use the largest file in the top list for better visual contrast.
+            let max_top_size = sorted_files.get(0).map(|Reverse((s, _))| *s).unwrap_or(1) as f64;
+
+            for (idx, Reverse((s, p))) in sorted_files.iter().enumerate() {
                 let s_str = if args.bytes {
                     format!("{} B", s)
                 } else {
-                    format_size(s, args.si)
+                    format_size(*s, args.si)
                 };
                 
                 let p_display = if let Ok(rel) = p.strip_prefix(&cwd) {
@@ -240,8 +331,14 @@ fn main() {
                     p.display().to_string().bold().to_string()
                 };
 
-                println!("{:<16} {}", s_str.green(), p_display);
+                let relative_to_top = (*s as f64 / max_top_size) * 100.0;
+                let bar = draw_gradient_bar(12, relative_to_top, (0, 255, 255), (255, 0, 255));
+                
+                let rank = format!("{:2}.", idx + 1);
+                println!("    {:<4} {:<12} {:<15} {}", rank.dimmed(), s_str.green(), bar, p_display);
             }
+            println!("  {}", "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".dimmed());
+            println!();
         }
     }
 }
