@@ -14,6 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive README and licensing.
 - Top files identification.
 
+## [0.1.1](https://github.com/benjamin-kraatz/sffs/compare/v0.1.0...v0.1.1) (2026-03-13)
+
+
+### Bug Fixes
+
+* trigger release for recent refactorings ([9fa24f1](https://github.com/benjamin-kraatz/sffs/commit/9fa24f1abd6a9992391d2d72d0198535806359e1))
+
 ## 0.1.0 (2026-03-13)
 
 
