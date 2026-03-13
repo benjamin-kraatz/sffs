@@ -1,7 +1,7 @@
 use clap::Parser;
 use std::path::PathBuf;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[command(author, version, about = "Super Fast File Size (sffs)", long_about = None)]
 pub struct Args {
     /// Path(s) to check size for. If omitted, checks the current directory.
@@ -51,4 +51,23 @@ pub struct Args {
     /// Suppress headers and footer
     #[arg(short = 's', long)]
     pub silent: bool,
+}
+
+impl Args {
+    pub fn benchmark_defaults(path: PathBuf, threads: Option<usize>) -> Self {
+        Self {
+            paths: vec![path],
+            follow_links: false,
+            git_ignore: false,
+            ignore_files: false,
+            ignore_hidden: false,
+            max_depth: None,
+            threads,
+            bytes: true,
+            si: false,
+            one_file_system: false,
+            top: None,
+            silent: true,
+        }
+    }
 }

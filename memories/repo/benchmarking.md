@@ -1,0 +1,4 @@
+- Benchmark reference artifact: cargo run --release --bin benchmark_reference
+- Criterion benchmark suite: cargo bench --bench cli_benchmarks
+- Built-in runtime speed comparison reads docs/benchmarks/reference.json via include_str! in src/perf.rs
+- Total size now counts file bytes only, not directory metadata sizes

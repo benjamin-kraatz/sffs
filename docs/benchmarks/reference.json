@@ -1,0 +1,112 @@
+{
+  "schema_version": 3,
+  "generated_at_epoch_seconds": 1773396681,
+  "generation_context": {
+    "host": {
+      "os": "macos",
+      "architecture": "aarch64",
+      "family": "unix",
+      "available_parallelism": 10
+    },
+    "git": {
+      "commit_sha": "9fa24f1abd6a9992391d2d72d0198535806359e1",
+      "short_commit_sha": "9fa24f1",
+      "dirty": true
+    }
+  },
+  "reference_label": "repo benchmark reference",
+  "reference_entries_per_second": 166698.06024254777,
+  "reference_bytes_per_second": 236928873.15132195,
+  "scenarios": [
+    {
+      "slug": "tiny-files",
+      "label": "Many tiny files",
+      "weight": 1.3,
+      "total_size": 175960,
+      "total_files": 2000,
+      "total_dirs": 41,
+      "sffs_default_median_ms": 5.335375,
+      "sffs_single_thread_median_ms": 4.686583000000001,
+      "sffs_best_profile": "threads-1",
+      "sffs_best_median_ms": 4.686583000000001,
+      "du_median_ms": 3.4533340000000003,
+      "sffs_default_entries_per_second": 382541.0585010426,
+      "sffs_single_thread_entries_per_second": 435498.52845879394,
+      "sffs_best_entries_per_second": 435498.52845879394,
+      "du_entries_per_second": 591023.0519260517,
+      "sffs_vs_du_multiplier": 0.7368554018994222
+    },
+    {
+      "slug": "deep-tree",
+      "label": "Deep directory tree",
+      "weight": 1.0,
+      "total_size": 16624,
+      "total_files": 32,
+      "total_dirs": 33,
+      "sffs_default_median_ms": 2.617708,
+      "sffs_single_thread_median_ms": 0.9881670000000001,
+      "sffs_best_profile": "threads-1",
+      "sffs_best_median_ms": 0.9881670000000001,
+      "du_median_ms": 2.1389579999999997,
+      "sffs_default_entries_per_second": 24830.88258889074,
+      "sffs_single_thread_entries_per_second": 65778.35527800463,
+      "sffs_best_entries_per_second": 65778.35527800463,
+      "du_entries_per_second": 30388.62848171867,
+      "sffs_vs_du_multiplier": 2.164571373057388
+    },
+    {
+      "slug": "wide-tree",
+      "label": "Wide directory fan-out",
+      "weight": 1.2,
+      "total_size": 543200,
+      "total_files": 1000,
+      "total_dirs": 201,
+      "sffs_default_median_ms": 5.87725,
+      "sffs_single_thread_median_ms": 5.9125000000000005,
+      "sffs_best_profile": "default",
+      "sffs_best_median_ms": 5.87725,
+      "du_median_ms": 6.288374999999999,
+      "sffs_default_entries_per_second": 204347.27125781617,
+      "sffs_single_thread_entries_per_second": 203128.96405919662,
+      "sffs_best_entries_per_second": 204347.27125781617,
+      "du_entries_per_second": 190987.3377462381,
+      "sffs_vs_du_multiplier": 1.0699519333021397
+    },
+    {
+      "slug": "large-files",
+      "label": "Few large files",
+      "weight": 0.9,
+      "total_size": 32505856,
+      "total_files": 16,
+      "total_dirs": 5,
+      "sffs_default_median_ms": 2.708167,
+      "sffs_single_thread_median_ms": 0.34420799999999996,
+      "sffs_best_profile": "threads-1",
+      "sffs_best_median_ms": 0.34420799999999996,
+      "du_median_ms": 1.986958,
+      "sffs_default_entries_per_second": 7754.322388538078,
+      "sffs_single_thread_entries_per_second": 61009.62208896947,
+      "sffs_best_entries_per_second": 61009.62208896947,
+      "du_entries_per_second": 10568.919926842942,
+      "sffs_vs_du_multiplier": 5.772550318412124
+    },
+    {
+      "slug": "mixed-tree",
+      "label": "Mixed realistic tree",
+      "weight": 1.6,
+      "total_size": 854400,
+      "total_files": 396,
+      "total_dirs": 61,
+      "sffs_default_median_ms": 3.5573750000000004,
+      "sffs_single_thread_median_ms": 2.214208,
+      "sffs_best_profile": "threads-1",
+      "sffs_best_median_ms": 2.214208,
+      "du_median_ms": 3.050084,
+      "sffs_default_entries_per_second": 128465.51178888927,
+      "sffs_single_thread_entries_per_second": 206394.34054975864,
+      "sffs_best_entries_per_second": 206394.34054975864,
+      "du_entries_per_second": 149831.93905479324,
+      "sffs_vs_du_multiplier": 1.3775056363268492
+    }
+  ]
+}

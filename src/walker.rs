@@ -107,22 +107,21 @@ pub fn walk_parallel(args: &Args, stats: &WalkerStats) {
         Box::new(move |result| {
             if let Ok(entry) = result {
                 if let Ok(metadata) = entry.metadata() {
-                    let s = metadata.len();
-                    tld.local_size += s;
                     if metadata.is_dir() {
                         tld.local_dirs += 1;
                     } else {
+                        let s = metadata.len();
+                        tld.local_size += s;
                         tld.local_files += 1;
-                    }
-
-                    if let (Some(ref mut heap), true) = (&mut tld.heap, metadata.is_file()) {
-                        let n = tld.n_top.unwrap();
-                        if heap.len() < n {
-                            heap.push(Reverse((s, entry.path().to_path_buf())));
-                        } else if let Some(Reverse((min_s, _))) = heap.peek() {
-                            if s > *min_s {
-                                heap.pop();
+                        if let Some(ref mut heap) = tld.heap {
+                            let n = tld.n_top.unwrap();
+                            if heap.len() < n {
                                 heap.push(Reverse((s, entry.path().to_path_buf())));
+                            } else if let Some(Reverse((min_s, _))) = heap.peek() {
+                                if s > *min_s {
+                                    heap.pop();
+                                    heap.push(Reverse((s, entry.path().to_path_buf())));
+                                }
                             }
                         }
                     }

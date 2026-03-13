@@ -1,19 +1,14 @@
-mod cli;
-mod render;
-mod walker;
-
 use clap::Parser;
 use mimalloc::MiMalloc;
 use owo_colors::OwoColorize;
-use std::cmp::Reverse;
-use std::collections::BinaryHeap;
 use std::path::PathBuf;
-use std::sync::atomic::Ordering;
-use std::time::Instant;
 
-use crate::cli::Args;
-use crate::render::{apply_gradient, draw_gradient_bar, format_size};
-use crate::walker::{walk_parallel, WalkerStats};
+use sffs::cli::Args;
+use sffs::perf::{
+    built_in_reference, format_speed_comparison, SpeedMetrics, BUILT_IN_REFERENCE_LABEL,
+};
+use sffs::render::{apply_gradient, draw_gradient_bar, format_size};
+use sffs::scan::collect_scan_summary;
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
@@ -43,20 +38,12 @@ fn main() -> std::process::ExitCode {
     }
     args.paths = valid_paths;
 
-    let stats = WalkerStats::new(args.top.is_some());
-    let start_time = Instant::now();
-
-    walk_parallel(&args, &stats);
-
-    let duration = start_time.elapsed();
-    let final_size = stats.total_size.load(Ordering::SeqCst);
-    let final_files = stats.total_files.load(Ordering::SeqCst);
-    let final_dirs = stats.total_dirs.load(Ordering::SeqCst);
+    let summary = collect_scan_summary(&args);
 
     let size_str = if args.bytes {
-        format!("{} B", final_size)
+        format!("{} B", summary.total_size)
     } else {
-        format_size(final_size, args.si)
+        format_size(summary.total_size, args.si)
     };
 
     if !args.silent {
@@ -73,15 +60,11 @@ fn main() -> std::process::ExitCode {
             "Total Size".cyan().bold(),
             grad_size.bold()
         );
-        println!("    {:<12} ❯ {}", "Files".dimmed(), final_files.yellow());
-        println!("    {:<12} ❯ {}", "Directories".dimmed(), final_dirs.blue());
+        println!("    {:<12} ❯ {}", "Files".dimmed(), summary.total_files.yellow());
+        println!("    {:<12} ❯ {}", "Directories".dimmed(), summary.total_dirs.blue());
 
-        let ms_per_file = if final_files > 0 {
-            duration.as_secs_f64() * 1000.0 / final_files as f64
-        } else {
-            0.0
-        };
-        let total_ms = duration.as_secs_f64() * 1000.0;
+        let speed_metrics = SpeedMetrics::from_summary(&summary);
+        let total_ms = speed_metrics.total_ms;
         let speed_val = if total_ms < 1000.0 {
             format!("{:.1}ms", total_ms).bright_green().to_string()
         } else {
@@ -89,10 +72,24 @@ fn main() -> std::process::ExitCode {
                 .bright_yellow()
                 .to_string()
         };
-        let per_file_val = format!("{:.3}ms/file", ms_per_file)
-            .bright_blue()
-            .to_string();
-        let speed_str = format!("{} ({})", speed_val, per_file_val);
+        let per_file_val = speed_metrics
+            .ms_per_file
+            .map(|ms| format!("{ms:.3}ms/file").bright_blue().to_string())
+            .unwrap_or_else(|| "n/a/file".dimmed().to_string());
+        let benchmark_cmp = built_in_reference()
+            .and_then(|reference| {
+                speed_metrics.comparison_multiplier(reference.reference_entries_per_second)
+            })
+            .map(|multiplier| {
+                let formatted = format_speed_comparison(multiplier);
+                if multiplier >= 1.0 {
+                    formatted.bright_magenta().to_string()
+                } else {
+                    formatted.dimmed().to_string()
+                }
+            })
+            .unwrap_or_else(|| format!("n/a vs {BUILT_IN_REFERENCE_LABEL}").dimmed().to_string());
+        let speed_str = format!("{} ({}, {})", speed_val, per_file_val, benchmark_cmp);
         println!("    {:<12} ❯ {}", "Speed".dimmed(), speed_str);
 
         println!(
@@ -104,19 +101,8 @@ fn main() -> std::process::ExitCode {
         println!("Total Size: {}", size_str);
     }
 
-    if let (Some(n), Some(top_mutex)) = (args.top, stats.top_files) {
-        let heaps = top_mutex.into_inner().unwrap_or_else(|e| e.into_inner());
-        let mut final_heap = BinaryHeap::with_capacity(n + 1);
-        for heap in heaps {
-            for item in heap {
-                final_heap.push(item);
-                if final_heap.len() > n {
-                    final_heap.pop();
-                }
-            }
-        }
-
-        if !final_heap.is_empty() {
+    if let Some(n) = args.top {
+        if !summary.top_files.is_empty() {
             println!("  {}", format!("TOP {}", n).bold());
             println!(
                 "  {}",
@@ -130,10 +116,9 @@ fn main() -> std::process::ExitCode {
                 "PATH".dimmed()
             );
 
-            let sorted_files: Vec<_> = final_heap.into_sorted_vec();
-            let max_top_size = sorted_files.first().map(|Reverse((s, _))| *s).unwrap_or(1) as f64;
+            let max_top_size = summary.top_files.first().map(|(s, _)| *s).unwrap_or(1) as f64;
 
-            for (idx, Reverse((s, p))) in sorted_files.iter().enumerate() {
+            for (idx, (s, p)) in summary.top_files.iter().enumerate() {
                 let s_str = if args.bytes {
                     format!("{} B", s)
                 } else {
